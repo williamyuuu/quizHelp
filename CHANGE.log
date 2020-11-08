@@ -1,0 +1,13 @@
+        QuizletHelp Change Log
+        ======================
+
+Version 1.0.1 -- November 07, 2020
+-----------------------------------
+- Chg: deleted unused function
+- Chg: input question / read source options
+- Ehn: enhancing matching method
+- NEW: added termcolor for colored terminal outputs
+
+Version 1.0.0 -- October 24, 2020
+-----------------------------------
+Initial release
