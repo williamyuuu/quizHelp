@@ -1,70 +1,114 @@
 import requests
 from bs4 import BeautifulSoup
 import re
+from termcolor import colored
+
 
 headers = {"User-Agent": 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36'}
 
+
+# reads HTML file, used to read source_page.html
 def readFrom(filename):
     f = open(filename + ".html", "r")
     return f.read()
 
-def writeTo(filename, input):
-    f = open(filename + ".txt", "w")
-    f.write(input)
-    f.close()
 
-
+# googles query for quizlet url and returns first link
 def search(query):
-    # print(f"finding query of {query}")
     try:
         from googlesearch import search
     except ImportError:
         print("No module named 'google' found")
 
-        # to search
-
     for j in search(query + " quizlet", tld="com", num=1, stop=1, pause=2):
         return j
 
-def find_answer(URL, query):
-    # print(f"finding answer for {query} at {URL}")
 
-    page = requests.get(URL, headers=headers)
+# purge articles and punctuations
+def purge(word):
+    word = re.sub(r"\bthe\b", "", word, flags=re.IGNORECASE)
+    word = re.sub(r"\ba\b", "", word, flags=re.IGNORECASE)
+    word = re.sub(r"\ban\b", "", word, flags=re.IGNORECASE)
+    word = re.sub(r"\.", "", word)
+    word = re.sub(r",", "", word)
+    word = re.sub(r"!", "", word)
+    word = re.sub(r"\?", "", word)
+    word = re.sub(r"-", " ", word)
+
+    return word
+
+
+# searches for the best match to your query and returns
+def find_best_match(query, text, high, output):
+    query = purge(query)
+    text_purged = purge(text)
+    query_list = query.split()
+
+    count = 0
+    # searches individual words from query to quizlet page
+    for x in range(len(query_list)):
+        ans = re.search(query_list[x], text_purged, re.IGNORECASE)
+
+        # adds one match if individual word matches quizlet question
+        if ans:
+            count = count + 1
+
+    # if quizlet question matches query better, replaces the best match output
+    if count > high:
+        high = count
+        output = text
+
+    # returns the best match info
+    return high, output
+
+
+# finds quizlet questions in url and matches to query
+def find_answer(url, query, x):
+    page = requests.get(url, headers=headers)
     soup = BeautifulSoup(page.content, "html.parser")
     soup = BeautifulSoup(soup.prettify(), "html.parser")
-    #print(soup)
 
+    high = 0
+    output = ""
+
+    # searches all the questions on quizlet page, returns best output
     for i in range(len((soup.findAll("div", {"class": "SetPageTerms-term"})))):
         text = (soup.findAll("div", {"class": "SetPageTerms-term"})[i]).text
         text = re.sub(r"\n", "", text)
-        text = re.sub(r"\s{3,}", " || ", text.strip())
-        # print(query)
+        high, output = find_best_match(query, text, high, output)
 
-        # print(text)
-        x = re.search(query, text, re.IGNORECASE)
-        if x:
-            print(text)
+    output = re.sub(r"\n", "", output)
+    output = re.sub(r"\s{3,}", " || ", output.strip())
+    print(f"[{x+1}] {output}")
 
-def one():
-    query = input("Enter question: ")
-    find_question = ' '.join(query.split()[2:5])
-    url = search(query)
-    find_answer(url, find_question)
 
-def main():
-    source = readFrom("quiz")
+# type in query option
+def type_in():
+    max = input("How many questions:")
+    for x in range(int(max)):
+        query = input("Enter question: ")
+        url = search(query)
+        find_answer(url, query)
+
+
+# reads off source_page.html for queries
+def source():
+    source = readFrom("source_page")
     soup = BeautifulSoup(source, "html.parser")
 
     for x in range(10):
-        info = (soup.findAll("textarea", {"name": "question_text"})[x]).text
-        info = re.sub(r"<.*?>", "", info)
-        query = info
-        find_question = ' '.join(query.split()[2:5])
-        # print("main question", x)
+        query = (soup.findAll("textarea", {"name": "question_text"})[x]).text
         url = search(query)
-        find_answer(url, find_question)
+        find_answer(url, query, x)
 
 
 if __name__ == "__main__":
-    #main()
-    one()
+    answer = input("input or source:")
+
+    if answer == "input":
+        type_in()
+    elif answer == "source":
+        source()
+    else:
+        # example of colored terminal print
+        print(colored("unidentified", "red"))
