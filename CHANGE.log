@@ -3,7 +3,7 @@
 
 Version 1.0.2 -- November 08, 2020
 -----------------------------------
-- BUG: #001 purged break lines that displays double "answers"
+- BUG: #001 fixed problem with breaklines that would display "double answers"
 - Enh: terminal colors, red indicated unmatched words and green indicates the answer
 
 Version 1.0.1 -- November 07, 2020
