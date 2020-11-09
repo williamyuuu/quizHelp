@@ -136,6 +136,6 @@ dmypy.json
 # Project related ignores
 .idea
 answers.txt
-quiz.html
+quizletPage.html
 source_page.html
 test*
