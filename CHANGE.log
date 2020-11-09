@@ -1,6 +1,11 @@
         QuizletHelp Change Log
         ======================
 
+Version 1.0.2 -- November 08, 2020
+-----------------------------------
+- BUG: #001 purged break lines that displays double "answers"
+- Enh: terminal colors, red indicated unmatched words and green indicates the answer
+
 Version 1.0.1 -- November 07, 2020
 -----------------------------------
 - Chg: deleted unused function

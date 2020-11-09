@@ -62,10 +62,32 @@ def find_best_match(query, text, high, output):
     return high, output
 
 
+# formats output by splitting answer from question displayed on quizlet page
+def display_f_output(output, query, x):
+
+    output = re.sub(r"\s{2,}", " || ", output.strip())
+    quizlet = output.split("||")
+    answer = colored(quizlet[1], "green", attrs=["bold"])
+    question = quizlet[0].split()
+
+    # match question portion to query, unmatched will be colored red
+    for i in range(len(question)):
+        ans = re.search(question[i], query, re.IGNORECASE)
+
+        # if not match, makes it red
+        if not ans:
+            question[i] = colored(question[i], "red", attrs=["underline"])
+
+    # combine the output and display
+    question = " ".join(question)
+    print(f"{[x+1]} {question} : {answer}")
+
+
 # finds quizlet questions in url and matches to query
 def find_answer(url, query, x):
     page = requests.get(url, headers=headers)
-    soup = BeautifulSoup(page.content, "html.parser")
+    page = re.sub(r"<br>", "", str(page.content))
+    soup = BeautifulSoup(page, "html.parser")
     soup = BeautifulSoup(soup.prettify(), "html.parser")
 
     high = 0
@@ -75,11 +97,10 @@ def find_answer(url, query, x):
     for i in range(len((soup.findAll("div", {"class": "SetPageTerms-term"})))):
         text = (soup.findAll("div", {"class": "SetPageTerms-term"})[i]).text
         text = re.sub(r"\n", "", text)
+        text = re.sub(r"\\", "", text)
         high, output = find_best_match(query, text, high, output)
 
-    output = re.sub(r"\n", "", output)
-    output = re.sub(r"\s{3,}", " || ", output.strip())
-    print(f"[{x+1}] {output}")
+    display_f_output(output, query, x)
 
 
 # type in query option
@@ -88,7 +109,7 @@ def type_in():
     for x in range(int(max)):
         query = input("Enter question: ")
         url = search(query)
-        find_answer(url, query)
+        find_answer(url, query, x)
 
 
 # reads off source_page.html for queries
