@@ -34,6 +34,11 @@ def purge(word):
     word = re.sub(r"!", "", word)
     word = re.sub(r"\?", "", word)
     word = re.sub(r"-", " ", word)
+    word = re.sub(r"/", " ", word)
+    word = re.sub(r"\(", "\\\(", word)
+    word = re.sub(r"\)", "\\\(", word)
+    word = re.sub(r"\'{2}", "\"", word)
+    word = re.sub(r"_{2,}", "____", word)
 
     return word
 
@@ -64,7 +69,6 @@ def find_best_match(query, text, high, output):
 
 # formats output by splitting answer from question displayed on quizlet page
 def display_f_output(output, query, x):
-
     output = re.sub(r"\s{2,}", " || ", output.strip())
     quizlet = output.split("||")
     answer = colored(quizlet[1], "green", attrs=["bold"])
@@ -116,9 +120,14 @@ def type_in():
 def source():
     source = readFrom("source_page")
     soup = BeautifulSoup(source, "html.parser")
+    soup = BeautifulSoup(soup.prettify(), "html.parser")
 
     for x in range(10):
         query = (soup.findAll("textarea", {"name": "question_text"})[x]).text
+        query = re.sub(r"<span>", "", query)
+        query = re.sub(r"</span>", "", query)
+        query.strip()
+        # print(query)
         url = search(query)
         find_answer(url, query, x)
 
