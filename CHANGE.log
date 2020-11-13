@@ -1,6 +1,11 @@
         QuizletHelp Change Log
         ======================
 
+Version 1.0.3 -- November 12, 2020
+-----------------------------------
+- BUG: #002 parenthesis in question would break the search function
+- Enh: new purge punctuations and changes
+
 Version 1.0.2 -- November 08, 2020
 -----------------------------------
 - BUG: #001 fixed problem with breaklines that would display "double answers"
